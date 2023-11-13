@@ -127,11 +127,11 @@ def main(args=None):
         if epoch >= args.epochs * 0.8 and args.sparse:
             mask.death_decay_update(decay_flag=False)
         if train_loss >= output:
-            # if not args.silence:
-            #     print('Saving model')
-            # save_path = '/data/xiaoq/sparse_seg/models_save_app/DSN_sort_%s_%s_%s_%s.pth'% (args.data, args.density, args.c_size, random_str)
+            if not args.silence:
+                print('Saving model')
+            save_path = f'{args.save_root_path}/DSN_sort_{args.data}_{args.density}_{args.c_size}_{random_str}.pth'
             train_loss = output
-            # torch.save(model.state_dict(), save_path)
+            torch.save(model.state_dict(), save_path)
 
     if not args.silence:
         print('Testing model')
@@ -186,6 +186,7 @@ def get_args():
     parser.add_argument('--pad_zero', type=str2bool, default=False,
                         help='padding method (default: False)')  ##set True for UCR2018
     parser.add_argument('--silence', type=str2bool, default=False, help='silence training outputs (default: False)')
+    parser.add_argument('--save_root_path', type=str)
 
     # ITOP settings
     sparselearning.core_kernel.add_sparse_args(parser)

@@ -127,11 +127,11 @@ def main(args=None):
         if epoch >= args.epochs * 0.8 and args.sparse:
             mask.death_decay_update(decay_flag=False)
         if train_loss >= output:
-            if not args.silence:
-                print('Saving model')
-            save_path = '/data/xiaoq/sparse_seg/models_save_app/DSN_sort_%s_%s_%s_%s.pth'% (args.data, args.density, args.c_size, random_str)
+            # if not args.silence:
+            #     print('Saving model')
+            # save_path = '/data/xiaoq/sparse_seg/models_save_app/DSN_sort_%s_%s_%s_%s.pth'% (args.data, args.density, args.c_size, random_str)
             train_loss = output
-            torch.save(model.state_dict(), save_path)
+            # torch.save(model.state_dict(), save_path)
 
     if not args.silence:
         print('Testing model')

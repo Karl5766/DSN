@@ -238,6 +238,7 @@ class Masking(object):
         self.remove_type(nn.BatchNorm2d)
         print('Removing 1D batch norms...')
         self.remove_type(nn.BatchNorm1d)
+        print('Now call self.init()')
         self.init(mode=sparse_init, density=density)
 
     def cal_nonzero_counts(self):
@@ -259,6 +260,7 @@ class Masking(object):
                     aa = 0
 
     def remove_weight(self, name):
+        print(f'removing {name} from {self.masks}')
         if name in self.masks:
             print('Removing {0} of size {1} = {2} parameters.'.format(name, self.masks[name].shape,
                                                                       self.masks[name].numel()))

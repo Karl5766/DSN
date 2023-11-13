@@ -226,10 +226,15 @@ class Masking(object):
     def add_module(self, module, density, sparse_init='ER'):
         self.modules.append(module)
         self.module = module
+
+        print('adding a new module')
+        for module in self.modules:
+            for name, tensor in module.named_parameters():
+                print(name)
+
         for name, tensor in module.named_parameters():
             if 'conv' not in name:
                 continue
-            print(f'{name} added to {self.names} and {self.masks.keys()}')
             self.names.append(name)
             self.masks[name] = torch.zeros_like(tensor, dtype=torch.float32, requires_grad=False).cuda()
 

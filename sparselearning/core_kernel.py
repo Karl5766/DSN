@@ -229,6 +229,7 @@ class Masking(object):
         for name, tensor in module.named_parameters():
             if 'conv' not in name:
                 continue
+            print(f'{name} added to {self.names} and {self.masks.keys()}')
             self.names.append(name)
             self.masks[name] = torch.zeros_like(tensor, dtype=torch.float32, requires_grad=False).cuda()
 
@@ -260,7 +261,6 @@ class Masking(object):
                     aa = 0
 
     def remove_weight(self, name):
-        print(f'removing {name} from {self.masks}')
         if name in self.masks:
             print('Removing {0} of size {1} = {2} parameters.'.format(name, self.masks[name].shape,
                                                                       self.masks[name].numel()))

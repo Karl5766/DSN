@@ -73,7 +73,8 @@ def evaluate(args, model, test_loader, weights=None):
 
 
 def main(args=None):
-    print(args)
+    if not args.silence:
+        print(args)
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -100,7 +101,8 @@ def main(args=None):
     y_ind = le.fit_transform(Y_train.ravel())
     recip_freq = len(Y_train)/(len(le.classes_)*np.bincount(y_ind).astype(np.float64))
     class_weight = recip_freq[le.transform(classes)]
-    print('Class weights: ', class_weight)
+    if not args.silence:
+        print('Class weights: ', class_weight)
 
     model = SCNN(c_in=X_train.shape[1], c_out=nb_classes, nf=args.ch_size, depth=args.depth, kernel=args.k_size, pad_zero=args.pad_zero)
     model.cuda()
@@ -125,17 +127,23 @@ def main(args=None):
         if epoch >= args.epochs * 0.8 and args.sparse:
             mask.death_decay_update(decay_flag=False)
         if train_loss >= output:
-            print('Saving model')
+            if not args.silence:
+                print('Saving model')
             save_path = '/data/xiaoq/sparse_seg/models_save_app/DSN_sort_%s_%s_%s_%s.pth'% (args.data, args.density, args.c_size, random_str)
             train_loss = output
             torch.save(model.state_dict(), save_path)
 
-    print('Testing model')
+    if not args.silence:
+        print('Testing model')
     model.load_state_dict(torch.load(save_path))
+    train_acc = evaluate(args, model, trainloader, weights=class_weight)
     val_acc = evaluate(args, model, valloader, weights=class_weight)
-    print('### data name: {}, best_val_acc {:.3f}'.format(args.data, val_acc))
+    if not args.silence:
+        print('### data name: {}, best_val_acc {:.3f}'.format(args.data, val_acc))
+    return train_acc, val_acc
 
-if __name__ == '__main__':
+
+def get_args():
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
 
     parser.add_argument('--batch-size', type=int, default=16, metavar='N',
@@ -175,19 +183,16 @@ if __name__ == '__main__':
     parser.add_argument('--depth', type=int, default=4, help='number of depth (default: 4)')
     parser.add_argument('--ch_size', type=int, default=47, help='channel size (default: 47)')
     parser.add_argument('--k_size', type=int, default=39, help='kernel size (default: 39)')
-    parser.add_argument('--pad_zero', type=str2bool, default=False, help='padding method (default: False)') ##set True for UCR2018
-
+    parser.add_argument('--pad_zero', type=str2bool, default=False,
+                        help='padding method (default: False)')  ##set True for UCR2018
+    parser.add_argument('--silence', type=str2bool, default=False, help='silence training outputs (default: False)')
 
     # ITOP settings
     sparselearning.core_kernel.add_sparse_args(parser)
 
     args = parser.parse_args()
+    return args
 
-    data_path = args.root
-    # datalist = os.listdir(data_path)
-    datalist = ["eeg2", "daily_sport", "HAR"]
-    datalist.sort()
 
-    for data in datalist:
-        args.data = data
-        main(args)
+def entry(args):
+    yield main(args)

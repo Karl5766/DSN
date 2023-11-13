@@ -195,4 +195,4 @@ def get_args():
 
 
 def entry(args):
-    yield main(args)
+    return main(args)

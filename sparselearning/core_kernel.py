@@ -179,6 +179,8 @@ class Masking(object):
 
                     mask_new = torch.cat(tuple(mask_list), 0)
                     self.masks[name][:] = mask_new
+        else:
+            raise ValueError(f'--sparse_init mode is set to {mode} which is invalid!')
 
         self.apply_mask()
         self.fired_masks = copy.deepcopy(self.masks) # used for ITOP
@@ -227,11 +229,6 @@ class Masking(object):
         self.modules.append(module)
         self.module = module
 
-        print('adding a new module')
-        for module in self.modules:
-            for name, tensor in module.named_parameters():
-                print(name)
-
         for name, tensor in module.named_parameters():
             if 'conv' not in name:
                 continue
@@ -244,7 +241,6 @@ class Masking(object):
         self.remove_type(nn.BatchNorm2d)
         print('Removing 1D batch norms...')
         self.remove_type(nn.BatchNorm1d)
-        print('Now call self.init()')
         self.init(mode=sparse_init, density=density)
 
     def cal_nonzero_counts(self):

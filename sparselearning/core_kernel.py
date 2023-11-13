@@ -142,7 +142,7 @@ class Masking(object):
 
                         new_mask = torch.zeros_like(x, dtype=torch.float32).cuda()
                         y, idx = torch.sort(torch.abs(x).flatten(), descending=True)  ## big to small
-                        new_mask.data.view(-1)[idx[:num_remain]] = 1.0
+                        new_mask.data.reshape(-1)[idx[:num_remain]] = 1.0
 
                         mask_list.append(new_mask)
 
@@ -172,7 +172,7 @@ class Masking(object):
                         x = x.permute(2, 0, 1)
 
                         new_mask = torch.zeros_like(x, dtype=torch.float32).cuda()
-                        new_mask.data.view(-1)[:num_remain] = 1.0
+                        new_mask.data.reshape(-1)[:num_remain] = 1.0
 
                         new_mask = new_mask.permute(1, 2, 0)
                         mask_list.append(new_mask)
@@ -388,7 +388,7 @@ class Masking(object):
         k = math.ceil(num_zeros + num_remove)
 
         x, idx = torch.sort((weight.data * weight.grad).pow(2).flatten())
-        mask.data.view(-1)[idx[:k]] = 0.0
+        mask.data.reshape(-1)[idx[:k]] = 0.0
 
         return mask
 
@@ -398,7 +398,7 @@ class Masking(object):
         if num_remove == 0.0: return weight.data != 0.0
         num_zeros = self.name2zeros[name]
 
-        x, idx = torch.sort(torch.abs(weight.data.view(-1)))
+        x, idx = torch.sort(torch.abs(weight.data.reshape(-1)))
         n = idx.shape[0]
 
         k = math.ceil(num_zeros + num_remove)
@@ -444,7 +444,7 @@ class Masking(object):
             num_zeros = (mask_chunk[i] == 0).sum().item()
             num_remove = math.ceil(self.death_rate * num_nonzeros)
 
-            x, idx = torch.sort(torch.abs(w_c.data.view(-1)))
+            x, idx = torch.sort(torch.abs(w_c.data.reshape(-1)))
             k = math.ceil(num_zeros + num_remove)
             threshold = x[k - 1].item()
 
@@ -492,7 +492,7 @@ class Masking(object):
 
             new_mask = torch.zeros_like(weight_add, dtype=torch.float32).cuda()
             y, idx = torch.sort(torch.abs(weight_add).flatten(), descending=True)  ## big to small
-            new_mask.data.view(-1)[idx[:num_remain]] = 1.0
+            new_mask.data.reshape(-1)[idx[:num_remain]] = 1.0
 
             mask_list.append(new_mask)
 
@@ -519,7 +519,7 @@ class Masking(object):
             g_c_abs[:, :, ind] += 10.0
 
             y, idx = torch.sort(g_c_abs.flatten(), descending=True)
-            mask_chunk[i].data.view(-1)[idx[:num_remove]] = 1.0
+            mask_chunk[i].data.reshape(-1)[idx[:num_remove]] = 1.0
 
             mask_list.append(mask_chunk[i])
 
@@ -585,7 +585,7 @@ class Masking(object):
 
         # find magnitude threshold
         # remove all weights which absolute value is smaller than threshold
-        x, idx = torch.sort(weight[weight > 0.0].data.view(-1))
+        x, idx = torch.sort(weight[weight > 0.0].data.reshape(-1))
         k = math.ceil(num_remove/2.0)
         if k >= x.shape[0]:
             k = x.shape[0]
@@ -594,7 +594,7 @@ class Masking(object):
 
         # find negativity threshold
         # remove all weights which are smaller than threshold
-        x, idx = torch.sort(weight[weight < 0.0].view(-1))
+        x, idx = torch.sort(weight[weight < 0.0].reshape(-1))
         k = math.ceil(num_remove/2.0)
         if k >= x.shape[0]:
             k = x.shape[0]
@@ -623,7 +623,7 @@ class Masking(object):
             indices = torch.randperm(len(idx))[:total_regrowth]
 
             # idx = torch.nonzero(self.fired_masks[name].flatten())
-            new_mask.data.view(-1)[idx[indices]] = 1.0
+            new_mask.data.reshape(-1)[idx[indices]] = 1.0
         else:
             new_mask[self.fired_masks[name]==0] = 1.0
             n = (new_mask == 0).sum().item()
@@ -648,7 +648,7 @@ class Masking(object):
         grad = self.get_momentum_for_weight(weight)
         grad = grad*(new_mask==0).float()
         y, idx = torch.sort(torch.abs(grad).flatten(), descending=True)
-        new_mask.data.view(-1)[idx[:total_regrowth]] = 1.0
+        new_mask.data.reshape(-1)[idx[:total_regrowth]] = 1.0
 
         return new_mask
 
@@ -658,7 +658,7 @@ class Masking(object):
         grad = grad*(new_mask==0).float()
 
         y, idx = torch.sort(torch.abs(grad).flatten(), descending=True)
-        new_mask.data.view(-1)[idx[:total_regrowth]] = 1.0
+        new_mask.data.reshape(-1)[idx[:total_regrowth]] = 1.0
 
         return new_mask
 

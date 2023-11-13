@@ -85,7 +85,7 @@ def main(args=None):
     dataset_name = os.path.split(args.root)[-1]
 
     if 'UCR_TS' in dataset_name:
-        X_train, Y_train, X_test, Y_test, nb_classes = load_UCR_data(root=args.root, file_name=args.data, normalize_timeseries=None)
+        X_train, Y_train, X_test, Y_test, nb_classes = load_UCR_data(root=args.root, file_name=args.data, normalize_timeseries=None, verbose=not args.silence)
     elif 'UEA_TS_Archive' in dataset_name:
         X_train, Y_train, X_test, Y_test, nb_classes = TSC_multivariate_data_loader(args.root, args.data)
     else:
